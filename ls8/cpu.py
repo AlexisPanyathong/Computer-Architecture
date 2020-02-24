@@ -86,4 +86,43 @@ class CPU:
 
     def run(self):
         """Run the CPU."""
-        pass
+        # Took these from lines 29, 32, & 34
+        LDI = 0b10000010
+        PRN = 0b01000111
+        HLT = 0b00000001 
+        
+        running = True
+        # While running:
+        while running:
+            
+            # Read the memory address that's stored in the PC and store that results in the IR.
+            ir = self.ram_read(self.pc)
+            
+            # Using `ram_read()`,read the bytes at `PC+1` and `PC+2` from RAM into variables `operand_a` and `operand_b` in case the instruction needs them.
+            operand_a = self.ram_read(self.pc + 1)
+            operand_b = self.ram_read(self.pc + 2)
+            
+            # If ir is equal to LDI
+            if ir == LDI:
+                print('Operands a: ', operand_a, self.ram[operand_a])
+                print('Operands b: ', operand_b, self.ram[operand_b])
+                
+                self.reg[operand_a] = operand_b
+                self.pc += 3
+            
+            elif ir == PRN:
+                reg = self.ram_read(self.pc + 1)
+                self.reg[reg]
+                print(f'Printing: {self.reg[reg]}')
+                self.pc += 2
+            
+            elif ir == HLT:
+               # HALT
+               print('Halt') 
+               running = False
+               self.pc += 1
+               
+            else:
+                print(f'Error, unknown command {ir}')
+                sys.exit(1)
+            
