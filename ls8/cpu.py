@@ -12,6 +12,12 @@ LDI = 130
 PRN = 71
 # MUL
 MUL = 162
+# PUSH
+PUSH = 69
+# POP
+POP = 70
+# SP
+SP = 7
 
 class CPU:
     """Main CPU class."""
@@ -145,6 +151,20 @@ class CPU:
                 reg_a = self.ram[self.pc + 1]
                 reg_b = self.ram[self.pc + 2]
                 self.reg[reg_a] *= self.reg[reg_b]
+            # PUSH
+            elif IR == PUSH:
+                reg = self.ram[self.pc + 1]
+                val = self.reg[reg]
+                self.reg[SP] -= 1
+                self.ram[self.reg[SP]] = val
+                # self.pc += 2
+            # POP
+            elif IR == POP:
+                reg = self.ram[self.pc + 1]
+                val = self.ram[self.reg[SP]]
+                self.reg[reg] = val
+                self.reg[SP] += 1
+                # self.pc += 2
             # HLT
             elif IR == HLT:
                 sys.exit(0)
