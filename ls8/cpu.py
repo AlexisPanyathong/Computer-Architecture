@@ -18,6 +18,12 @@ PUSH = 69
 POP = 70
 # SP
 SP = 7
+# CALL
+CALL = 80
+# RET
+RET = 17
+# ADD
+ADD = 160
 
 class CPU:
     """Main CPU class."""
@@ -130,6 +136,7 @@ class CPU:
         while True:
             IR = self.ram[self.pc]
             operand_c = IR >> 6
+            sets_pc = IR >> 4 & 0b0001
             # LDI
             if IR == LDI:
                 # Read the bytes at `PC+1` and `PC+2` from RAM into variables `operand_a` and `operand_b`
@@ -151,6 +158,11 @@ class CPU:
                 reg_a = self.ram[self.pc + 1]
                 reg_b = self.ram[self.pc + 2]
                 self.reg[reg_a] *= self.reg[reg_b]
+            # ADD
+            elif IR == ADD:
+                reg_a = self.ram[self.pc + 1]
+                reg_b = self.ram[self.pc + 2]
+                self.reg[reg_a] += self.reg[reg_b]  
             # PUSH
             elif IR == PUSH:
                 reg = self.ram[self.pc + 1]
@@ -165,6 +177,18 @@ class CPU:
                 self.reg[reg] = val
                 self.reg[SP] += 1
                 # self.pc += 2
+            # CALL
+            elif IR == CALL:
+                # register is self.reg
+                self.reg[SP] -= 1
+                # memory is self.ram
+                self.ram[self.reg[SP]] = self.pc + 2
+                reg = self.ram[self.pc + 1]
+                self.pc = self.reg[reg]
+            # RET 
+            elif IR == RET:
+                self.pc = self.ram[self.reg[SP]]
+                self.reg[SP] += 1
             # HLT
             elif IR == HLT:
                 sys.exit(0)
@@ -172,4 +196,5 @@ class CPU:
             else:
                 print(f"Error, I did not understand that command: {IR}")
                 sys.exit(1)
-            self.pc += operand_c + 1
+            if sets_pc == 0:
+                self.pc += operand_c + 1
